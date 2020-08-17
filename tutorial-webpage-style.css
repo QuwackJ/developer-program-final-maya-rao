@@ -1,0 +1,21 @@
+body {
+    background-color: #C5CED2;
+    font-size: large;
+    font-family: 'Varela Round', sans-serif;
+    color: #2D3336;
+}
+
+a {
+    color: #0059B3;
+}
+
+a:hover {
+    color: #1C24D5;
+    cursor: pointer;
+}
+
+#errors {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Weather Maps Tutorial and Reflection</title>
+        <link href="tutorial-webpage-style.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    </head>
+
+    <body>
+        <h1>How to Use the Weather Maps</h1>
+        <h2><a href="https://s3.amazonaws.com/xyz-demo/scenes/xyz_tangram/index.html?space=F6z41QkA&token=AD_k65x6Tcuv4_hQuloCUQA&basemap=xyz-reduction-dark&projection=globe&demo=0&vizMode=range&buildings=0&label=&pattern=&patternColor=%2384c6f9&points=6&lines=0&outlines=0&places=1&roads=0&clustering=0&quadCountmode=mixed&quadRez=4&hexbins=0&voronoi=0&delaunay=0&water=1&property=totpcp&palette=colorBrewerYlGnBu&paletteFlip=false&rangeFilter=custom&rangeFilterMin=0&rangeFilterMax=500&sort=values&hideOutliers=false&pointSizeProp=&pointSizeRange=%5B4%2C20%5D&propertySearch=%7B%7D#2/39.7/-100.0" target="_blank">Map 1: Raw Weather Data</a></h2>
+        <p>Default Settings (in case the page settings get refreshed)</p>
+        <ul>
+            <li>Roads, Buildings, Lines, and Outlines: 0</li>
+            <li>Water and Places: 1</li>
+            <li>Points: 6</li>
+            <li>Clustering: Off</li>
+            <li>Basemap: xyz-reduction-dark</li>
+            <li>Projection: mercator or globe</li>
+            <li>Analyze By: value range</li>
+            <li>Visualize by Property: totpcp</li>
+            <li>Color Palette: colorBrewerYlGnBu</li>
+            <li>Limit Values: Custom (min: 0, max: 500, values are in millimeters)</li>
+        </ul>
+        <p>This map uses raw data from <a href="https://www.cpc.ncep.noaa.gov/products/cadb/" target="_blank">NOAA's Climate Prediction Center</a>. The CSV for July, 2020 contains worldwide temperature and precipitation data collected from global weather stations.</p>
+        <p>The purpose of this map is to show what happens when error codes, represented by -99999, are not removed from the data. Try changing the settings (e.g. Analyze By, Limit Values, any of the searchables, etc.) and see what happens to the map!</p>
+
+        <h2><a href="https://s3.amazonaws.com/xyz-demo/scenes/xyz_tangram/index.html?space=xCYO08zp&token=AD_k65x6Tcuv4_hQuloCUQA&basemap=xyz-reduction-dark&projection=globe&demo=0&vizMode=range&buildings=0&pattern=&patternColor=%2384c6f9&points=6&lines=0&outlines=0&places=1&roads=0&clustering=0&quadCountmode=mixed&quadRez=4&hexbins=0&voronoi=0&delaunay=0&water=1&property=totpcp&palette=colorBrewerYlGnBu&paletteFlip=false&rangeFilter=custom&rangeFilterMin=0&rangeFilterMax=500&sort=values&hideOutliers=false&pointSizeProp=&pointSizeRange=%5B4%2C20%5D&propertySearch=%7B%7D#2/38.5/0.0" target="_blank">Map 2: Global Precipitation Based on Elevation</a></h2>
+        <p>Default Settings: See Map 1</p>
+        <p>This map is designed to display worldwide precipitation levels at different elevations. Map 2 uses a cleaner version of the data collected for Map 1, which contains information on city, country, latitude, longitude, elevation, total precipitation (in millimeters), and custom-made tags. To toy with the custom tags, which help to filter and expose specific data, check the boxes on the right labeled "none", "dry_lowland", "dry_plateau", etc.</p>
+
+
+        <h1>How I Made the Weather Maps</h1>
+        <p>For the first map, I started by uploading my raw CSV file into a Data Hub Space, allowing me to store my information in a private geospatial database. To visualize my data as a map, I also used <a href="https://www.here.xyz/space-invader/" target="_blank">Space Invader</a>, which is a data inspection tool that is invoked from the Command Line Interface (<a href="https://www.here.xyz/cli/" target="_blank">CLI</a>) tool for <a href="https://developer.here.com/products/data-hub" target="_blank">HERE Data Hub</a>. On Space Invader, I customized the default settings so that the error codes and anomalies wouldn’t make the map look strange when it is first opened. However, by adjusting the default settings, users can see why it is important to have clean data and how certain data points can change an entire map.</p>
+        <p>Map 2 involved a lot more work compared to Map 1, since I had to create a <a href="https://repl.it/@QuwackJ/clean-July-data#specificJulyData.csv" target="_blank">cleaned-up version of my data</a>. Using pandas, I began the process of data clean-up by dropping unnecessary columns from the initial CSV and uploading my work into a new data frame. Next, I dropped any rows that had -99999 for country, elevation (elev), or total precipitation (totpcp). Initially, I tried using sed to convert -99999 into the standard NaN error code so that I could apply the dropna function, but I eventually found that it wasn’t necessary nor did it work as intended. After getting all the data I needed, I created tags to help highlight interesting data based on elevation and total precipitation. Lastly, the cleaned-up data was uploaded to another Data Hub Space and then transformed into a map with Space Invader.</p>
+
+        <h2>What Happened to Map 3?</h2>
+        <p>In my project proposal, I said that I would be creating three maps using python, Data Hub, and Space Invader to present data on global precipitation during July, 2020. However, due to time constraints and data quality issues in the original CSV file, I was unable to complete the last map. Specifically, the original data file presents several problems when trying to consolidate total precipitation by country. Here are a few examples:</p>
+        <div id="errors">
+            <img src="spaces-error.jpg" alt="Leading Spaces Before Country Name" width="550px" style="margin: 15px;">
+            <img src="country-names.jpg" alt="Different Names for the Same Country" width="550px" style="margin: 15px;">
+            <img src="not-country.jpg" alt="Not a Country" width="550px" style="margin: 15px;">
+        </div>
+        <p>Descriptions of the Errors</p>
+        <ol>
+            <li>In the original CSV, some country names are entered with a leading space while others are not, which means that a string comparison would evaluate to False</li>
+            <li>Some countries are entered with different variants of the same name</li>
+            <li>There are places in the country column that aren't even countries</li>
+        </ol>
+        <p>After these errors are fixed, using sed and awk, the next task is to associate the aggregated rainfall totals by country with polygons for each country. In order to do this, country names need to be matched with ISO (International Standards Organization) defined country names. This turns out to be a fuzzy matching problem, for which there is a python library called "fuzzywuzzy". I plan to work on solving this problem, but will likely be able to do so after the submission deadline. Whenever I solve it, I will post the third map here.</p>
+
+        <h2>Special Acknowledgments</h2>
+        <p>Special thanks to my dad, his colleagues John Oram and Omkar Mestry, and HERE Technologies!</p>
+    </body>
+</html>
