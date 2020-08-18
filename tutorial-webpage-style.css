@@ -19,3 +19,7 @@ a:hover {
     flex-wrap: wrap;
     justify-content: space-evenly;
 }
+
+img {
+    height: 100% !important;
+}
